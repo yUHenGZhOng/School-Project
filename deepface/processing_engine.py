@@ -55,9 +55,8 @@ class EmotionProcessor:
     def process_frame(self, frame: np.ndarray, frame_number: int):
         """
         Processes a single frame to detect, re-identify, and analyze faces.
-        (SORT tracker has been removed for a simpler, direct re-identification workflow).
+        This function is designed to be 'silent' on success, only printing errors.
         """
-        print(f"--- Analyzing Frame {frame_number} ---")
         results_data = []
 
         # Step 1: Detect all faces and their emotions in one go
@@ -75,10 +74,7 @@ class EmotionProcessor:
             all_faces = []
 
         if not all_faces or not isinstance(all_faces, list) or len(all_faces) == 0:
-            print(f"Warning: No faces found on sampled frame {frame_number}.")
             return []
-
-        print(f"Frame {frame_number}: Found {len(all_faces)} faces.")
 
         # Step 2: Process each detected face directly
         for face_data in all_faces:
@@ -113,7 +109,6 @@ class EmotionProcessor:
                 print(f"Could not get embedding for a face in frame {frame_number}: {e}")
 
             if person_id == -1:
-                print(f"Frame {frame_number} - Failed to get person_id for a face at region {r}. Skipping.")
                 continue
 
             # Save the face crop (using the BGR crop)
@@ -132,5 +127,4 @@ class EmotionProcessor:
                 'emotions': face_data['emotion']
             })
 
-        print(f"--- Frame {frame_number} processed. Successfully recorded {len(results_data)} faces. ---")
         return results_data

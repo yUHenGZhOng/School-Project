@@ -49,22 +49,26 @@ def main(video_path, output_csv, interval):
 
         frame_number += 1
         
-        # Print progress, but only update on non-processed frames to keep it clean
+        # Skip frames that are not on the sampling interval
         if frame_number % frame_interval != 0:
-            print(f"Processing frame {frame_number} / {total_frames}", end='\r')
             continue
 
-        print(f"Analyzing frame {frame_number} / {total_frames}...")
-
-        # 5. Process the frame, passing the frame number
+        # 5. Process the frame
         results_for_frame = processor.process_frame(frame, frame_number)
         
-        # 6. Append results to the main list
+        # 6. Print the consolidated log message
+        num_faces = len(results_for_frame)
+        print(f"正在分析第 {frame_number} 帧，检测到 {num_faces} 个人脸")
+
+        # 7. Add timestamp and append results to the main list
         if results_for_frame:
+            timestamp_sec = round(frame_number / fps, 2)
+            for r in results_for_frame:
+                r['timestamp'] = timestamp_sec
             all_results.extend(results_for_frame)
 
     cap.release()
-    # Print a newline character to move to the next line after the progress indicator
+    # A newline is not needed anymore as there's no progress bar
     print("\nVideo processing finished.")
 
     # 7. Save results to CSV
@@ -79,7 +83,7 @@ def main(video_path, output_csv, interval):
         df = pd.concat([df.drop(columns=['emotions']), emotion_df], axis=1)
 
         # Reorder columns for better readability
-        base_cols = ['frame_number', 'person_id', 'bbox', 'dominant_emotion']
+        base_cols = ['frame_number', 'timestamp', 'person_id', 'bbox', 'dominant_emotion']
         emotion_cols = list(emotion_df.columns)
         final_cols = base_cols + emotion_cols
         df = df[final_cols]
