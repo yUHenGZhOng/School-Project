@@ -3,12 +3,20 @@ import cv2
 import pandas as pd
 import argparse
 import os
+import shutil
 from processing_engine import EmotionProcessor
 
 def main(video_path, output_csv, interval):
     """
     Main function to process the video and save results.
     """
+    # 0. Clear and recreate the output directory for face crops
+    face_save_path = 'output/faces'
+    if os.path.exists(face_save_path):
+        shutil.rmtree(face_save_path)
+    os.makedirs(face_save_path)
+    print(f"Cleared and recreated directory: {face_save_path}")
+
     # 1. Check if video file exists
     if not os.path.exists(video_path):
         print(f"Error: Video file not found at '{video_path}'")
@@ -71,7 +79,7 @@ def main(video_path, output_csv, interval):
         df = pd.concat([df.drop(columns=['emotions']), emotion_df], axis=1)
 
         # Reorder columns for better readability
-        base_cols = ['frame_number', 'person_id', 'bbox']
+        base_cols = ['frame_number', 'person_id', 'bbox', 'dominant_emotion']
         emotion_cols = list(emotion_df.columns)
         final_cols = base_cols + emotion_cols
         df = df[final_cols]
