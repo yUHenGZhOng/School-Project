@@ -7,19 +7,16 @@ from deepface import DeepFace
 # The IOU function is no longer needed as we are not matching tracker boxes.
 
 class EmotionProcessor:
-    def __init__(self, reid_threshold=0.4):
+    def __init__(self, reid_threshold=0.32, face_save_path='output/faces'):
         """
         Initializes the EmotionProcessor.
         - reid_threshold: Cosine distance threshold for re-identification.
-        (SORT tracker has been removed)
+        - face_save_path: The directory where face crops will be saved.
         """
         self.face_database = {}  # Stores {person_id: [list of embeddings]}
         self.next_person_id = 0
         self.reid_threshold = reid_threshold
-
-        # Setup directory for saving face crops
-        self.face_save_path = 'output/faces'
-        os.makedirs(self.face_save_path, exist_ok=True)
+        self.face_save_path = face_save_path
 
     def _reidentify_and_update_database(self, face_embedding):
         """
